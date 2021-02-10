@@ -1,0 +1,12 @@
+setuptools
+python-dotenv
+KekikTaban
+
+spotipy
+
+Pyrogram
+tgcrypto
+asyncio
+aiohttp
+
+APScheduler
