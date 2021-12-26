@@ -102,7 +102,7 @@ async def baslangic():
     global VAR_OLAN_BIO
     benim_varlik  = await SpotiTelegram.resolve_peer("me")
     benim_kisilik = await SpotiTelegram.send(GetFullUser(id=benim_varlik))
-    VAR_OLAN_BIO  = benim_kisilik.about
+    VAR_OLAN_BIO  = benim_kisilik.full_user.about
 
     await SpotiTelegram.send_message('me', f"""__Merhaba, Ben **{SESSION_ADI}** Tarafından Gönderildim!__
 
@@ -139,8 +139,8 @@ async def bio_guncelle():
         konsol.print(f"[bold yellow][[bold green]+[/]][/] [bold cyan]{ne_dinliyorum}[/]")
 
 zamanlayici = AsyncIOScheduler()
-# zamanlayici.add_job(bio_guncelle, "interval", seconds=15)
-zamanlayici.add_job(bio_guncelle, "interval", minutes=1)
+zamanlayici.add_job(bio_guncelle, "interval", seconds=30)
+# zamanlayici.add_job(bio_guncelle, "interval", minutes=1)
 
 if __name__ == "__main__":
     calan_sarki()
