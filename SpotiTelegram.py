@@ -1,25 +1,16 @@
 # Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
 
-from pyrogram import Client, __version__
+from pyrogram                     import Client, __version__
 from pyrogram.raw.functions.users import GetFullUser
-from spotipy import Spotify
+from spotipy        import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from sys import version_info
 import os, asyncio
-from dotenv import load_dotenv
-from KekikTaban import KekikTaban
+from dotenv    import load_dotenv
+from Kekik.cli import konsol, temizle, cikis_yap, hata_yakala
 
-taban = KekikTaban(
-    baslik   = "@KekikAkademi SpotiTelegram",
-    aciklama = "SpotiTelegram Başlatıldı..",
-    banner   = "SpotiTelegram",
-    genislik = 75
-)
-
-konsol = taban.konsol
-
-if (taban.bellenim_surumu.split('-')[-1] != 'aws') and (not os.path.exists("ayar.env")): # Heroku Geçmek için aws
-    konsol.print("\n[bold red]Lütfen ayar.env dosyanızı oluşturun..\n", width=taban.genislik, justify="center")
+if not os.path.exists("ayar.env"):
+    konsol.print("\n[bold red]Lütfen ayar.env dosyanızı oluşturun..\n", width=70, justify="center")
     quit(1)
 
 load_dotenv("ayar.env")
@@ -57,23 +48,22 @@ def calan_sarki():
     if not os.path.exists(f".cache-{KULLANICI}"):
         yetkilendirme_linki = kimlik.get_authorize_url()
 
-        konsol.print(f"\n[bold red][!] Spotify Yetkilendirmesi Yapılmamış..![/]", width=taban.genislik, justify="center")
-        konsol.print(f"\n\n[yellow]Lüften link'e gidip yetkilendirmeyi tamamlayınız..[/]\n\n{yetkilendirme_linki}")
+        konsol.print(f"\n[bold red][!] Spotify Yetkilendirmesi Yapılmamış..![/]", width=70, justify="center")
+        konsol.print(f"\n\n[yellow]Lüften link'e gidip yetkilendirmeyi tamamlayınız..[/]\n\n")
+        print(yetkilendirme_linki)
 
-        kimlik_onay = konsol.input(f'\n[bold blue]Link ([magenta]{REDIRECT_URI}?code=QWEQWE[/]) »» :[/] ')
+        kimlik_onay = konsol.input(f"\n[bold blue]Link ([magenta]{REDIRECT_URI}?code=QWEQWE[/]) »» :[/] ")
 
         try:
             token = kimlik.parse_auth_response_url(url=kimlik_onay)
             kimlik.get_access_token(token, as_dict=False, check_cache=False)
         except Exception as hata:
-            konsol.print(f"\n[bold red][!] {type(hata).__name__} | {hata}[/]", width=taban.genislik, justify="center")
+            konsol.print(f"\n[bold red][!] {type(hata).__name__} | {hata}[/]", width=70, justify="center")
             exit()
 
-        taban.temizle
-        taban.logo_yazdir()
-        taban.bilgi_yazdir()
+        temizle()
 
-        konsol.print("\n[bold green][+] Spotify Yetkilendirme Başarılı..[/]\n", width=taban.genislik, justify="center")
+        konsol.print("\n[bold green][+] Spotify Yetkilendirme Başarılı..[/]\n", width=70, justify="center")
 
     spoti       = Spotify(auth_manager=kimlik)
     calan_sarki = spoti.current_user_playing_track()
@@ -85,23 +75,25 @@ def calan_sarki():
         return None
 
 try:
-    SpotiTelegram       = Client(
-        STRING_SESSION,
+    SpotiTelegram = Client(
+        name            = SESSION_ADI,
+        session_string  = STRING_SESSION,
         api_id          = API_ID,
-        api_hash        = API_HASH
+        api_hash        = API_HASH,
+        in_memory       = True
     )
 except ValueError:
-    konsol.print("\n[bold red]Lütfen ayar.env dosyanızı DÜZGÜNCE! oluşturun..[/]\n", width=taban.genislik, justify="center")
+    konsol.print("\n[bold red]Lütfen ayar.env dosyanızı DÜZGÜNCE! oluşturun..[/]\n", width=70, justify="center")
     quit(1)
 
-VAR_OLAN_BIO = ''
+VAR_OLAN_BIO = ""
 
 async def baslangic():
     await SpotiTelegram.start()
 
     global VAR_OLAN_BIO
     benim_varlik  = await SpotiTelegram.resolve_peer("me")
-    benim_kisilik = await SpotiTelegram.send(GetFullUser(id=benim_varlik))
+    benim_kisilik = await SpotiTelegram.invoke(GetFullUser(id=benim_varlik))
     VAR_OLAN_BIO  = benim_kisilik.full_user.about
 
     await SpotiTelegram.send_message('me', f"""__Merhaba, Ben **{SESSION_ADI}** Tarafından Gönderildim!__
@@ -120,7 +112,7 @@ __Senin Bilgilerin;__
 **Kendi gizliliğin için bunları kimseyle paylaşma..**""")
 
     surum = f"{str(version_info[0])}.{str(version_info[1])}"
-    konsol.print(f"[gold1]@{SESSION_ADI}[/] [yellow]:bird:[/] [bold red]Python: [/][i]{surum}[/]\n", width=taban.genislik, justify="center")
+    konsol.print(f"[gold1]@{SESSION_ADI}[/] [yellow]:bird:[/] [bold red]Python: [/][i]{surum}[/]\n", width=70, justify="center")
 
     await SpotiTelegram.stop()
 
@@ -143,8 +135,10 @@ zamanlayici.add_job(bio_guncelle, "interval", seconds=30)
 # zamanlayici.add_job(bio_guncelle, "interval", minutes=1)
 
 if __name__ == "__main__":
-    calan_sarki()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(baslangic())
-    zamanlayici.start()
-    SpotiTelegram.run()
+    try:
+        calan_sarki()
+        asyncio.run(baslangic())
+        zamanlayici.start()
+        SpotiTelegram.run()
+    except Exception as hata:
+        hata_yakala(hata)

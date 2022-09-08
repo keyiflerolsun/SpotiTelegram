@@ -1,6 +1,8 @@
 setuptools
-python-dotenv
+wheel
+Kekik
 KekikTaban
+python-dotenv
 
 spotipy
 
