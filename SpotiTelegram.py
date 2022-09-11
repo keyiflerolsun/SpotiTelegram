@@ -137,7 +137,7 @@ zamanlayici.add_job(bio_guncelle, "interval", seconds=30)
 if __name__ == "__main__":
     try:
         calan_sarki()
-        asyncio.run(baslangic())
+        SpotiTelegram.run(baslangic())
         zamanlayici.start()
         SpotiTelegram.run()
     except Exception as hata:
